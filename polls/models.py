@@ -1,7 +1,10 @@
 from datetime import datetime
 from django.db import models
+from django.utils.timezone import now
+from .tasks import delete_expired_paste
 import string
 import random
+
 
 # Create your models here.
 class Paste(models.Model):
@@ -23,5 +26,12 @@ class Paste(models.Model):
                 self.slug = self.generate_slug()
         super().save(*args, **kwargs)
 
+        if self.expires_at:
+            delay = (self.expires_at - now()).total_seconds()
+            delay = max(delay, 0)
+            delete_expired_paste.apply_async((self.id,), countdown=delay)
+
     def __str__(self):
         return self.slug
+
+

@@ -28,6 +28,14 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+# celery rabbit
+
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672/'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'django-db'
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'polls'
+    'polls',
+    'django_celery_results'
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  django:
+    build: .
+    container_name: django
+    command: python manage.py runserver 0.0.0.0:8080
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "15672:15672"  # Web UI
+      - "5672:5672"    # AMQP
+    networks:
+      - app-network
+
+  celery:
+    build: .
+    container_name: celery
+    command: celery -A SecretShare worker --loglevel=info
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+    depends_on:
+      - django
+      - rabbitmq
+
+networks:
+  app-network:
+    driver: bridge
